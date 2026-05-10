@@ -10,8 +10,8 @@ body {
   background-color: var(--bg);
   font-family: 'Segoe UI', sans-serif;
   color: var(--text-main);
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  /* Rimosso overflow: hidden globale per permettere lo scroll su mobile */
 }
 
 .navbar {
@@ -25,10 +25,9 @@ body {
   z-index: 10;
 }
 
-/* Stile per il tasto ESCI in alto a destra[cite: 14] */
 .logout-btn {
   background-color: var(--primary);
-  color: white; /* Scritta bianca come richiesto */
+  color: white;
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -41,9 +40,10 @@ body {
   opacity: 0.9;
 }
 
+/* LAYOUT PRINCIPALE */
 .dashboard-layout {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1fr 320px; /* Due colonne su desktop */
   height: calc(100vh - 55px);
 }
 
@@ -64,7 +64,7 @@ body {
   overflow-y: auto;
 }
 
-/* STILE MINIMAPPA NEL FORM[cite: 10] */
+/* STILE MINIMAPPA NEL FORM */
 #map-form-container {
   width: 100%;
   height: 200px !important;
@@ -88,7 +88,7 @@ body {
   border-radius: 5px;
 }
 
-/* PAGINA DETTAGLIO OVERLAY[cite: 12] */
+/* PAGINA DETTAGLIO OVERLAY */
 .cat-detail-overlay {
   position: fixed;
   top: 0;
@@ -99,13 +99,13 @@ body {
   z-index: 9999;
   display: flex;
   justify-content: center;
-  padding: 40px 0;
+  padding: 20px 0; /* Ridotto padding per mobile */
   overflow-y: auto;
 }
 
 .detail-content-card {
   background: #252525;
-  width: 90%;
+  width: 95%;
   max-width: 1000px;
   height: fit-content;
   border-radius: 20px;
@@ -208,4 +208,35 @@ body {
   padding: 15px;
   background: #252525;
   border-radius: 0 0 8px 8px;
+}
+
+/* --- MEDIA QUERIES PER MOBILE --- */
+
+@media (max-width: 768px) {
+  body {
+    overflow-y: auto; /* Permette lo scroll della pagina intera su mobile */
+  }
+
+  .dashboard-layout {
+    grid-template-columns: 1fr; /* Una sola colonna */
+    height: auto; /* L'altezza si adatta al contenuto */
+  }
+
+  .map-section {
+    height: 300px; /* Mappa più piccola in alto */
+  }
+
+  .side-panel {
+    border-left: none;
+    border-top: 1px solid #333;
+    overflow-y: visible; /* Lascia che il contenuto fluisca nel body */
+  }
+
+  .detail-content-card {
+    grid-template-columns: 1fr; /* Anche il dettaglio gatto diventa a colonna singola */
+  }
+
+  .visual-column img {
+    height: 250px; /* Immagine gatto più bassa su mobile */
+  }
 }

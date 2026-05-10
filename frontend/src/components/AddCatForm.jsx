@@ -82,10 +82,12 @@ export default function AddCatForm({ session, onCatAdded }) {
     setImageFile(file);
   };
 
- const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
   setLoading(true);
   try {
+    // Recupera il token dalla sessione di Supabase
+    const token = session.access_token;
     let imageUrl = '';
     
     // 1. Caricamento immagine su Supabase Storage (rimane invariato)
@@ -101,8 +103,9 @@ export default function AddCatForm({ session, onCatAdded }) {
     // 2. Chiamata alla tua API Back-end (Sostituisce il vecchio insert di Supabase)
     const response = await fetch('http://localhost:5000/api/cats', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+      headers: { 'Content-Type': 'application/json' ,
+      'Authorization': `Bearer ${session.access_token}`
+      },body: JSON.stringify({
         title, 
         description, 
         lat: position[0], 

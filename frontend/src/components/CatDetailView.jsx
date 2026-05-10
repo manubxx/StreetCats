@@ -11,30 +11,40 @@ export default function CatDetailView({ cat, session, onClose }) {
   }, [cat.id])
 
   async function fetchComments() {
-    const { data } = await supabase
-      .from('comments')
-      .select('*')
-      .eq('cat_id', cat.id)
-      .order('created_at', { ascending: false })
-    setComments(data || [])
+  try {
+    // Chiamata alla tua API invece di Supabase
+    const response = await fetch(`http://localhost:5000/api/cats/${cat.id}/comments`);
+    const data = await response.json();
+    setComments(data || []);
+  } catch (err) {
+    console.error("Errore fetch commenti:", err);
   }
+}
 
-  async function handleSubmitComment(e) {
-    e.preventDefault()
-    if (!newComment.trim() || !session) return
+async function handleSubmitComment(e) {
+  e.preventDefault();
+  if (!newComment.trim() || !session) return;
 
-    const { error } = await supabase.from('comments').insert([{
-      cat_id: cat.id,
-      user_id: session.user.id,
-      user_email: session.user.email,
-      content: newComment
-    }])
+  try {
+    const response = await fetch('http://localhost:5000/api/comments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cat_id: cat.id,
+        user_id: session.user.id,
+        user_email: session.user.email,
+        content: newComment
+      })
+    });
 
-    if (!error) {
-      setNewComment("")
-      fetchComments()
+    if (response.ok) {
+      setNewComment("");
+      fetchComments(); // Ricarica la lista
     }
+  } catch (err) {
+    alert("Errore nell'invio del commento");
   }
+}
 
   return (
     <div className="cat-detail-overlay">
