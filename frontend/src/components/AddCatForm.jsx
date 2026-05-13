@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { API_BASE_URL } from '../config';
 
 export default function AddCatForm({ session, onCatAdded }) {
   const [title, setTitle] = useState('');
@@ -65,16 +66,16 @@ export default function AddCatForm({ session, onCatAdded }) {
     };
   }, [customMarkerIcon]);
 
-  // --- LOGICA DI GESTIONE FILE AGGIORNATA ---
+  // LOGICA DI GESTIONE IMMAGINE
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Controllo dimensione (2MB = 2 * 1024 * 1024 bytes)
+    // Controllo dimensione (2MB)
     const maxSize = 2 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert("Il file è troppo grande! Massimo 2MB.");
-      e.target.value = ""; // Svuota l'input
+      alert("Il file è troppo grande. Massimo 2MB.");
+      e.target.value = ""; 
       setImageFile(null);
       return;
     }
@@ -86,11 +87,11 @@ const handleSubmit = async (e) => {
   e.preventDefault();
   setLoading(true);
   try {
-    // Recupera il token dalla sessione di Supabase
+    // Recupera il token 
     const token = session.access_token;
     let imageUrl = '';
     
-    // 1. Caricamento immagine su Supabase Storage (rimane invariato)
+    // Caricamento immagine su Supabase 
     if (imageFile) {
       const fileExt = imageFile.name.split('.').pop();
       const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
@@ -100,8 +101,8 @@ const handleSubmit = async (e) => {
       imageUrl = urlData.publicUrl;
     }
 
-    // 2. Chiamata alla tua API Back-end (Sostituisce il vecchio insert di Supabase)
-    const response = await fetch('http://localhost:5000/api/cats', {
+    // Chiamata alla API Back-end 
+    const response = await fetch(`${API_BASE_URL}/cats`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' ,
       'Authorization': `Bearer ${session.access_token}`
@@ -122,7 +123,7 @@ const handleSubmit = async (e) => {
     setDescription(''); 
     setImageFile(null);
     if (onCatAdded) onCatAdded();
-    alert('Gatto segnalato con successo tramite API! 🐾');
+    alert('Gatto segnalato con successo!');
   } catch (err) {
     alert(err.message);
   } finally {

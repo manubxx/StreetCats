@@ -50,7 +50,7 @@ function App() {
                 className="dropdown-form" 
                 onToggle={(e) => {
                   if (e.target.open) {
-                    // Segnala alla minimappa di ricalcolare le dimensioni dopo l'apertura
+                    // Ricacalcola le dimensioni dopo l'apertura della minimappa
                     setTimeout(() => {
                       window.dispatchEvent(new Event('map-refresh'));
                       window.dispatchEvent(new Event('resize'));
@@ -58,7 +58,7 @@ function App() {
                   }
                 }}
               >
-                <summary>➕ NUOVA SEGNALAZIONE</summary>
+                <summary> NUOVA SEGNALAZIONE</summary>
                 <div className="dropdown-content">
                   <AddCatForm session={session} onCatAdded={handleCatAdded} />
                 </div>

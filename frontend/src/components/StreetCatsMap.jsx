@@ -2,12 +2,13 @@ import { useEffect, useRef, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { API_BASE_URL } from '../config';
 
 export default function StreetCatsMap({ refreshTrigger, onSelectCat }) {
   const mapRef = useRef(null);
   const markersLayerRef = useRef(L.layerGroup());
 
-  // Definiamo l'icona personalizzata per i gatti[cite: 9]
+  // icona personalizzata per i gatti
   const blueArrowIcon = useMemo(() => L.divIcon({
     className: 'custom-arrow-marker',
     html: `<div style="width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 20px solid #007bff; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));"></div>`,
@@ -15,7 +16,7 @@ export default function StreetCatsMap({ refreshTrigger, onSelectCat }) {
     iconAnchor: [12, 20] 
   }), []);
 
-  // 1. Inizializzazione della mappa[cite: 9]
+  //  Inizializzazione della mappa
   useEffect(() => {
     if (!mapRef.current) {
       mapRef.current = L.map('map-display').setView([41.8902, 12.4922], 12);
@@ -27,14 +28,13 @@ export default function StreetCatsMap({ refreshTrigger, onSelectCat }) {
     }
   }, []);
 
-  // 2. Caricamento dei dati e gestione dei Popup[cite: 8, 9]
- // --- DENTRO StreetCatsMap.jsx ---
+  // Caricamento dei dati
 
 useEffect(() => {
   const loadCats = async () => {
     try {
-      // Sostituiamo la chiamata Supabase con la chiamata al tuo Back-end
-      const response = await fetch('http://localhost:5000/api/cats');
+   
+      const response = await fetch(`${API_BASE_URL}/cats`);
       if (!response.ok) throw new Error("Errore nel recupero dati dal server");
       
       const data = await response.json();

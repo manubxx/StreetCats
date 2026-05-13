@@ -20,7 +20,7 @@ export default function Auth() {
     setLoading(true)
     const { error } = await supabase.auth.signUp({ email, password })
     if (error) alert("Errore Registrazione: " + error.message)
-    else alert("Registrazione completata! Ora puoi fare il login.")
+    else alert("Registrazione completata!")
     setLoading(false)
   }
 
@@ -30,12 +30,12 @@ export default function Auth() {
       margin: '10px auto', 
       padding: '20px', 
       borderRadius: '10px', 
-      backgroundColor: 'transparent', // Integrato con il pannello laterale[cite: 14]
+      backgroundColor: 'transparent', 
       color: '#e0e0e0' 
     }}>
       <h2 style={{ 
         textAlign: 'center', 
-        color: '#ff4757', // Rosso StreetCats[cite: 14]
+        color: '#ff4757', 
         marginBottom: '20px' 
       }}>
         Accedi a StreetCats
