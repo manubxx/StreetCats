@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { supabase } from '../supabaseClient';
+import { catService } from '../services/catService';
+import { storageService } from '../services/storageService';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { API_BASE_URL } from '../config';
@@ -66,12 +67,12 @@ export default function AddCatForm({ session, onCatAdded }) {
     };
   }, [customMarkerIcon]);
 
-  // LOGICA DI GESTIONE IMMAGINE
+  // GESTIONE IMMAGINE
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Controllo dimensione (2MB)
+    // Controllo dimensione
     const maxSize = 2 * 1024 * 1024;
     if (file.size > maxSize) {
       alert("Il file è troppo grande. Massimo 2MB.");
@@ -87,45 +88,33 @@ const handleSubmit = async (e) => {
   e.preventDefault();
   setLoading(true);
   try {
-    // Recupera il token 
-    const token = session.access_token;
     let imageUrl = '';
     
-    // Caricamento immagine su Supabase 
+    // Caricamento immagine
     if (imageFile) {
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from('catpictures').upload(fileName, imageFile);
-      if (uploadError) throw uploadError;
-      const { data: urlData } = supabase.storage.from('catpictures').getPublicUrl(fileName);
-      imageUrl = urlData.publicUrl;
+      imageUrl = await storageService.uploadCatImage(imageFile, session.user.id);
     }
 
-    // Chiamata alla API Back-end 
-    const response = await fetch(`${API_BASE_URL}/cats`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' ,
-      'Authorization': `Bearer ${session.access_token}`
-      },body: JSON.stringify({
-        title, 
-        description, 
-        lat: position[0], 
-        lng: position[1], 
-        image_url: imageUrl, 
-        user_id: session.user.id
-      })
-    });
+    // Salvataggio gatto tramite API
+    const catData = {
+      title, 
+      description, 
+      lat: position[0], 
+      lng: position[1], 
+      image_url: imageUrl, 
+      user_id: session.user.id
+    };
 
-    if (!response.ok) throw new Error('Errore nel salvataggio sul back-end');
+    await catService.createCat(catData, session.access_token);
 
-    // 3. Reset form
+    // Reset form
     setTitle(''); 
     setDescription(''); 
     setImageFile(null);
     if (onCatAdded) onCatAdded();
     alert('Gatto segnalato con successo!');
   } catch (err) {
-    alert(err.message);
+    alert("Errore: " + err.message);
   } finally {
     setLoading(false);
   }

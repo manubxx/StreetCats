@@ -1,52 +1,38 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../supabaseClient'
 import ReactMarkdown from 'react-markdown';
-import { API_BASE_URL } from '../config';
+import { catService } from '../services/catService'; 
 
 export default function CatDetailView({ cat, session, onClose }) {
   const [comments, setComments] = useState([])
   const [newComment, setNewComment] = useState("")
 
-  useEffect(() => {
-    fetchComments()
-  }, [cat.id])
-
-  async function fetchComments() {
+  // Caricamento commenti
+  const fetchComments = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/cats/${cat.id}/comments`);
-      const data = await response.json();
+      const data = await catService.getComments(cat.id);
       setComments(data || []);
     } catch (err) {
-      console.error("Errore fetch commenti:", err);
+      console.error("Errore fetch commenti:", err.message);
     }
-  }
+  };
 
+  useEffect(() => {
+    fetchComments();
+  }, [cat.id]);
+
+  // Invio commento
   async function handleSubmitComment(e) {
     e.preventDefault();
     if (!newComment.trim() || !session) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/comments`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          
-          'Authorization': `Bearer ${session.access_token}` 
-        },
-        body: JSON.stringify({
-          cat_id: cat.id,
-          content: newComment
-        })
-      });
-
-      if (response.ok) {
-        setNewComment("");
-        fetchComments(); 
-      } else {
-        alert("Errore nell'invio: " + response.statusText);
-      }
+     
+      await catService.addComment(cat.id, newComment, session.access_token);
+      
+      setNewComment("");
+      fetchComments(); 
     } catch (err) {
-      alert("Errore nell'invio del commento");
+      alert("Errore nell'invio del commento: " + err.message);
     }
   }
 
@@ -75,7 +61,8 @@ export default function CatDetailView({ cat, session, onClose }) {
               {comments.length === 0 && <p style={{color: '#666'}}>Nessun commento ancora.</p>}
               {comments.map(c => (
                 <div key={c.id} className="comment-item">
-                  <b>{c.user_email?.split('@')[0]}</b>
+                  {}
+                  <b>{c.user_email ? c.user_email.split('@')[0] : 'Utente'}: </b>
                   {c.content}
                 </div>
               ))}

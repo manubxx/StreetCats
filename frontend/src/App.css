@@ -210,7 +210,7 @@ body {
   border-radius: 0 0 8px 8px;
 }
 
-/* MEDIA QUERIES*/
+/* MOBILEMEDIA QUERIES*/
 
 @media (max-width: 768px) {
   body {

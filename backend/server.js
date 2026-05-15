@@ -2,7 +2,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const pool = require('./db'); // Assicurati che db.js sia configurato con la stringa di Supabase
+const pool = require('./db'); 
 
 
 const app = express();
@@ -10,13 +10,12 @@ app.use(cors());
 app.use(express.json());
 
 
-//Authentication Middleware 
 const { createClient } = require('@supabase/supabase-js');
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
 // Middleware per verificare il token
 const authenticateJWT = async (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1]; // Prende il token dall'header "Bearer TOKEN"
+  const token = req.headers.authorization?.split(' ')[1];
 
   if (!token) {
     return res.status(401).json({ error: 'Accesso negato. Token mancante.' });
@@ -28,12 +27,12 @@ const authenticateJWT = async (req, res, next) => {
     return res.status(401).json({ error: 'Token non valido o scaduto' });
   }
 
-  // Sovrascriviamo lo user_id proveniente dal body con quello REALE del token
+  // Sovrascriviamo lo user_id proveniente dal body con quello del token
   req.user = user; 
   next();
 };
 
-// GET: Recupera i gatti (usata per la mappa/lista)
+// GET: Recupera i gatti (usata per la mappa)
 app.get('/api/cats', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM cats ORDER BY created_at DESC');
@@ -48,12 +47,11 @@ app.get('/api/cats', async (req, res) => {
 app.post('/api/cats', authenticateJWT, async (req, res) => {
   const { title, description, lat, lng, image_url } = req.body;
   const user_id = req.user.id;
-  // --- VALIDAZIONE MINIMA ---
+
   if (!title || title.trim().length < 2) {
     return res.status(400).json({ error: 'Il titolo è obbligatorio e deve essere valido' });
   }
 
-  // Controllo coordinate (devono essere entro i limiti geografici reali)
   const latitude = parseFloat(lat);
   const longitude = parseFloat(lng);
   if (isNaN(latitude) || latitude < -90 || latitude > 90 || 
@@ -93,11 +91,11 @@ app.get('/api/cats/:id/comments', async (req, res) => {
   }
 });
 
-// POST: Aggiunge un commento (Protetto da JWT)
+// POST: Aggiunge un commento 
 app.post('/api/comments', authenticateJWT, async (req, res) => {
   const { cat_id, content } = req.body;
-  const user_id = req.user.id;      // Preso dal Token verificato
-  const user_email = req.user.email; // Preso dal Token verificato
+  const user_id = req.user.id;      // Presi dal Token verificato
+  const user_email = req.user.email; //
 
   try {
     const newComment = await pool.query(

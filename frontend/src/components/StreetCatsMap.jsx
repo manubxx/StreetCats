@@ -1,8 +1,8 @@
 import { useEffect, useRef, useMemo } from 'react';
-import { supabase } from '../supabaseClient';
+import { catService } from '../services/catService';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { API_BASE_URL } from '../config';
+
 
 export default function StreetCatsMap({ refreshTrigger, onSelectCat }) {
   const mapRef = useRef(null);
@@ -21,7 +21,7 @@ export default function StreetCatsMap({ refreshTrigger, onSelectCat }) {
     if (!mapRef.current) {
       mapRef.current = L.map('map-display').setView([41.8902, 12.4922], 12);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+        attribution: 'OpenStreetMap contributors'
       }).addTo(mapRef.current);
       
       markersLayerRef.current.addTo(mapRef.current);
@@ -33,11 +33,8 @@ export default function StreetCatsMap({ refreshTrigger, onSelectCat }) {
 useEffect(() => {
   const loadCats = async () => {
     try {
-   
-      const response = await fetch(`${API_BASE_URL}/cats`);
-      if (!response.ok) throw new Error("Errore nel recupero dati dal server");
-      
-      const data = await response.json();
+
+      const data = await catService.getAllCats();
 
       if (data && mapRef.current) {
         markersLayerRef.current.clearLayers(); 
@@ -49,25 +46,24 @@ useEffect(() => {
           if (!isNaN(lat) && !isNaN(lng)) {
             const marker = L.marker([lat, lng], { icon: blueArrowIcon });
             
-            const popupContent = document.createElement('div');
-            popupContent.className = 'map-tooltip';
-            popupContent.innerHTML = `
+          
+            const container = document.createElement('div');
+            container.className = 'map-tooltip';
+            container.innerHTML = `
               <div style="text-align: center; color: #333;">
                 <img src="${cat.image_url}" alt="${cat.title}" style="width: 100px; height: 80px; object-fit: cover; border-radius: 5px; margin-bottom: 5px;" />
                 <h4 style="margin: 5px 0;">${cat.title}</h4>
-                <button id="view-cat-${cat.id}" style="background: #ff4757; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">
+                <button id="view-cat-${cat.id}" class="view-btn" style="background: #ff4757; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">
                   Vedi Dettagli
                 </button>
               </div>
             `;
 
-            marker.bindPopup(popupContent);
+            marker.bindPopup(container);
 
             marker.on('popupopen', () => {
               const btn = document.getElementById(`view-cat-${cat.id}`);
-              if (btn) {
-                btn.onclick = () => onSelectCat(cat); 
-              }
+              if (btn) btn.onclick = () => onSelectCat(cat); 
             });
             
             marker.addTo(markersLayerRef.current);
@@ -75,7 +71,7 @@ useEffect(() => {
         });
       }
     } catch (error) {
-      console.error("Errore:", error.message);
+      console.error("Errore caricamento gatti:", error.message);
     }
   };
 

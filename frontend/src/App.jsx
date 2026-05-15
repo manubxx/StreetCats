@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { supabase } from './supabaseClient'
+import { supabase } from './services/supabaseClient'
 import Auth from './components/Auth'
 import AddCatForm from './components/AddCatForm' 
 import StreetCatsMap from './components/StreetCatsMap'
